@@ -11,7 +11,9 @@
 
 [参考仓库](https://github.com/ageitgey/face_recognition/tree/master)
 <p align="right">by 时奇旭 2024.10.31</p>
+
 ---
+
 ## recognize-withDnn仓库
 
 1. 由于我没有安装opencv而选择在vscode中实现，需要的opencv文件在文件夹"opencv_files"中，在vscode的terminal中安装所需的库即可，与初次的识别文件需要安装的库相同。
