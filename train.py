@@ -1,6 +1,7 @@
 import face_recognition as fr
 import os
 import json
+import cv2 as cv
 path = 'Pictures/'
 
 imagePaths = [os.path.join(path,f) for f in os.listdir(path)]
@@ -9,6 +10,7 @@ known_face_encoding = []
 known_face_names = []
 
 for imagepath in imagePaths:
+
     image = fr.load_image_file(imagepath)
     face_locations = fr.face_locations(image)
     face_encodings = fr.face_encodings(image,face_locations)[0]
