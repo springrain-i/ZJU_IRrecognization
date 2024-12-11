@@ -4,14 +4,25 @@ import { View, TextInput, Button, StyleSheet, Alert } from "react-native";
 const InputPage = ({ navigation }) => {
   const [ipAddress, setIpAddress] = useState("");
   const [port, setPort] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false); // 增加状态以控制提交流程
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!ipAddress || !port) {
       Alert.alert("Error", "Please enter both IP address and port.");
       return;
     }
-    const webSocketUrl = `ws://${ipAddress}:${port}`;
-    navigation.navigate("WebSocketPage", { webSocketUrl });
+
+    setIsSubmitting(true); // 开始提交
+    try {
+      const webSocketUrl = `ws://${ipAddress}:${port}`;
+      // 可以在这里执行其他必要逻辑（如验证 WebSocket URL 是否可用等）
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // 模拟异步操作
+      navigation.navigate("WebSocketPage", { webSocketUrl });
+    } catch (error) {
+      Alert.alert("Error", "Failed to prepare WebSocket connection.");
+    } finally {
+      setIsSubmitting(false); // 恢复提交状态
+    }
   };
 
   return (
@@ -30,7 +41,7 @@ const InputPage = ({ navigation }) => {
         onChangeText={setPort}
         keyboardType="numeric"
       />
-      <Button title="Connect" onPress={handleSubmit} />
+      <Button title="Connect" onPress={handleSubmit} disabled={isSubmitting} />
     </View>
   );
 };

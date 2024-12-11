@@ -1,13 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { StyleSheet, View, Image, Text, Dimensions } from "react-native";
+import { useFocusEffect } from "@react-navigation/native"; // 引入useFocusEffect
 import { Buffer } from "buffer";
 
 export default function WebSocketPage({ route }) {
   const { webSocketUrl } = route.params; // 获取传递过来的 WebSocket URL
   const [frame, setFrame] = useState(null);
-  const [status, setStatus] = useState("Connecting...");
+  const [status, setStatus] = useState("Disconnected");
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const socketRef = useRef(null);
+  const reconnectTimerRef = useRef(null); // 用于存储重连定时器的引用
 
   const connectWebSocket = () => {
     setStatus("Connecting...");
@@ -32,7 +34,7 @@ export default function WebSocketPage({ route }) {
     };
 
     socketRef.current.onclose = () => {
-      setStatus("Disconnected, retrying...");
+      setStatus("Disconnected");
       reconnectWebSocket();
     };
 
@@ -43,20 +45,35 @@ export default function WebSocketPage({ route }) {
   };
 
   const reconnectWebSocket = () => {
-    setTimeout(() => {
+    if (reconnectTimerRef.current) return; // 防止重复设置重连定时器
+    reconnectTimerRef.current = setTimeout(() => {
       connectWebSocket();
+      reconnectTimerRef.current = null; // 清除定时器引用
     }, 3000);
   };
 
-  useEffect(() => {
-    connectWebSocket();
+  const stopReconnect = () => {
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null; // 清除定时器引用
+    }
+  };
 
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.close();
-      }
-    };
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // 页面聚焦时连接 WebSocket
+      connectWebSocket();
+
+      // 页面失去焦点时停止重连并关闭连接
+      return () => {
+        if (socketRef.current) {
+          socketRef.current.close();
+          socketRef.current = null;
+          stopReconnect(); // 停止重连尝试
+        }
+      };
+    }, [webSocketUrl]) // 确保当 webSocketUrl 改变时重新连接
+  );
 
   const calculateImageSize = () => {
     const screenWidth = Dimensions.get("window").width;
