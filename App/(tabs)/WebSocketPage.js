@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { StyleSheet, View, Image, Text, Dimensions } from "react-native";
+import { StyleSheet, View, Image, Text, Dimensions, ActivityIndicator } from "react-native";
 import { useFocusEffect } from "@react-navigation/native"; // 引入useFocusEffect
 import { Buffer } from "buffer";
 
@@ -101,13 +101,22 @@ export default function WebSocketPage({ route }) {
   return (
     <View style={styles.container}>
       <Text style={styles.status}>{status}</Text>
-      {frame ? (
+      {status === "Connecting..." || status === "Error occurred, retrying..." ? (
+        <ActivityIndicator size="large" color="#fff" style={styles.loader} />
+      ) : frame ? (
         <Image
           source={{ uri: frame }}
           style={{
             width: displaySize.width,
             height: displaySize.height,
             resizeMode: "contain",
+            borderRadius: 20, // 圆角效果
+            borderWidth: 5, // 给图片加边框
+            borderColor: "#fff", // 边框颜色
+            shadowColor: "#000", // 图片阴影
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3, // 阴影透明度
+            shadowRadius: 10, // 阴影模糊度
           }}
         />
       ) : (
@@ -122,14 +131,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
+    backgroundColor: "#000", // 深色背景
+    padding: 20,
+    borderRadius: 8,
   },
   status: {
     color: "#fff",
-    marginBottom: 10,
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+    textTransform: "uppercase", // 将状态文本转为大写
   },
   waiting: {
     color: "#fff",
     fontSize: 18,
+    textAlign: "center",
+    fontStyle: "italic", // 斜体效果
+  },
+  loader: {
+    marginTop: 20, // 给加载指示器添加间距
+    transform: [{ scale: 1.5 }], // 放大加载指示器
   },
 });
